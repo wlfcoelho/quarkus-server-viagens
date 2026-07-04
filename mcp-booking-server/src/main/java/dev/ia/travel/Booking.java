@@ -1,4 +1,4 @@
-package dev.ia;
+package dev.ia.travel;
 
 import java.time.LocalDate;
 

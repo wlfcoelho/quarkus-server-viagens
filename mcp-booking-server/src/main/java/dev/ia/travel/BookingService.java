@@ -1,4 +1,4 @@
-package dev.ia;
+package dev.ia.travel;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -30,19 +30,13 @@ public class BookingService {
         return Optional.ofNullable(bookings.get(bookingId));
     }
 
-    public Optional<Booking> cancelBooking(long bookingId) {
-        String currentUser = SecurityContext.getCurrentUser();
+    public Optional<Booking> cancelBooking(long bookingId, String name) {
         if (bookings.containsKey(bookingId)) {
             Booking booking = bookings.get(bookingId);
-            if (booking.customerName().equals(currentUser)) {
+            if (booking.customerName().equals(name)) {
                 Booking cancelledBooking = new Booking(
-                        booking.id(),
-                        booking.customerName(),
-                        booking.destination(),
-                        booking.startDate(),
-                        booking.endDate(),
-                        BookingStatus.CANCELLED, // O novo status
-                        booking.category()
+                        booking.id(), booking.customerName(), booking.destination(), booking.startDate(), booking.endDate(),
+                        BookingStatus.CANCELLED, booking.category()
                 );
                 this.bookings.replace(bookingId, cancelledBooking);
                 return Optional.of(cancelledBooking);

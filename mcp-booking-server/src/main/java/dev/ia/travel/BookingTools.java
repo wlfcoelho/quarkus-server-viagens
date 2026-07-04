@@ -1,6 +1,7 @@
-package dev.ia;
+package dev.ia.travel;
 
-import dev.langchain4j.agent.tool.Tool;
+import io.quarkiverse.mcp.server.Tool;
+import io.quarkiverse.mcp.server.ToolArg;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -10,23 +11,28 @@ import java.util.List;
 public class BookingTools {
     @Inject
     BookingService bookingService;
-
-    @Tool("Obtém os detalhes completos de uma reserva com base em seu número de identificação (bookingId).")
-    public String getBookingDetails(long bookingId) {
+    //Cuidado com os nomes das Tools, pois, elas podem causar alucinação ma IA
+    @Tool(name = "get_booking_details")
+    public String getBookingDetails(
+            @ToolArg(description = "O ID numérico único da reserva (ex: 12345)") long bookingId) {
         return bookingService.getBookingDetails(bookingId)
                 .map(Booking::toString)
                 .orElse("Reserva com ID " + bookingId + " não encontrada.");
     }
 
-    @Tool("Cancela uma reserva existente com base no seu ID (bookingId). O usuário deve estar autenticado.")
-    public String cancelBooking(long bookingId) {
-        return bookingService.cancelBooking(bookingId)
+    @Tool(
+            name = "cancel_booking")
+    public String cancelBooking(
+            @ToolArg(description = "ID da reserva a cancelar") long bookingId,
+            @ToolArg(description = "Usuário que está tentando cancelar a reserva") String name) {
+        return bookingService.cancelBooking(bookingId, name)
                 .map(b -> "Reserva " + b.id() + " cancelada com sucesso.")
                 .orElse("Não foi possível cancelar a reserva. Verifique se o ID está correto e se você tem permissão.");
     }
 
-    @Tool("Lista os pacotes de viagem disponíveis para uma determinada categoria (ex: ADVENTURE, TREASURES).")
-    public String listPackagesByCategory(Category category) {
+    @Tool(name = "list_packages_by_category")
+    public String listPackagesByCategory(
+            @ToolArg(description = "Categoria utilizada como filtro para pacotes") Category category) {
         List<Booking> packages = bookingService.findPackagesByCategory(category);
         if (packages.isEmpty()) {
             return "Nenhum pacote encontrado para a categoria: " + category;
